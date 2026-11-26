@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ja" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' https://cdn.discordapp.com data:" />
+  <title>Discord 棒読みちゃんBot</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ===== メイン画面 ===== -->
+  <div id="mainView" class="view">
+    <header>
+      <h1>Discord 棒読みちゃんBot</h1>
+      <div class="head-right">
+        <button id="updateBtn" type="button" class="badge update" hidden></button>
+        <span id="bouyomiState" class="badge bstate ng">● 棒読みちゃん 未接続</span>
+        <span id="status" class="badge stopped">停止中</span>
+        <button id="openSettings" type="button" class="icon-btn" aria-label="設定" title="設定">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="homeMain">
+      <!-- ホームの4つのカテゴリー(右端のつまみをドラッグして並べ替え。順番は保存されます) -->
+      <section class="card cat" data-card="run" data-title="読み上げの設定・開始/停止">
+        <div class="row options">
+          <label class="check"><input id="readName" type="checkbox" /> 発言者名を読み上げる</label>
+          <label class="inline">最大文字数 <input id="maxLength" type="number" min="10" max="500" /></label>
+          <label class="check"><input id="autoStart" type="checkbox" /> 起動時に自動開始</label>
+        </div>
+
+        <div class="row actions">
+          <button id="startBtn" type="button" class="primary">開始</button>
+          <button id="stopBtn" type="button" disabled>停止</button>
+          <p id="restartNote" class="hint restart-note" aria-hidden="true">設定が変更されています。<br />「再起動」を押すと再ログインして反映されます。</p>
+          <button id="saveBtn" type="button" class="sub">設定を保存</button>
+        </div>
+      </section>
+
+      <section class="card cat" data-card="tree" data-title="読み上げるサーバー・チャンネル">
+        <label id="treeLabel">読み上げるサーバー・チャンネル</label>
+        <div id="channelTree" class="tree" role="group" aria-labelledby="treeLabel"></div>
+        <div id="treeResizer" class="resizer" role="separator" aria-orientation="horizontal" tabindex="0"
+             aria-label="チャンネル一覧の高さを変更" title="ドラッグで高さを変更(ダブルクリックで元に戻す)"></div>
+        <p id="treeNote" class="hint"></p>
+      </section>
+
+      <section class="card cat" data-card="ids" data-title="読み上げチャンネルID">
+        <label for="channelIds">読み上げチャンネルID(カンマ区切り・上の一覧のチェックと連動)</label>
+        <div class="row">
+          <input id="channelIds" type="text" placeholder="例: 123456789012345678, 234567890123456789" />
+          <button id="clearIds" type="button" class="sub">クリア</button>
+        </div>
+
+        <label id="selLabel">対象チャンネル一覧</label>
+        <div id="selectedList" class="selected-list" role="group" aria-labelledby="selLabel"></div>
+        <div id="selResizer" class="resizer" role="separator" aria-orientation="horizontal" tabindex="0"
+             aria-label="対象チャンネル一覧の高さを変更" title="ドラッグで高さを変更(ダブルクリックで元に戻す)"></div>
+      </section>
+
+      <section id="logCard" class="card cat log-card" data-card="log" data-title="ログ">
+        <div class="row between">
+          <strong>ログ</strong>
+          <button id="clearLog" type="button" class="sub">クリア</button>
+        </div>
+        <div id="log" class="log" role="log" aria-live="polite"></div>
+        <div id="logResizer" class="resizer" role="separator" aria-orientation="horizontal" tabindex="0"
+             aria-label="ログの高さを変更" title="ドラッグで高さを変更(ダブルクリックで元に戻す)"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===== 設定画面 ===== -->
+  <div id="settingsView" class="view" hidden>
+    <header>
+      <div class="row">
+        <button id="backBtn" type="button" class="icon-btn back" aria-label="戻る">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>戻る
+        </button>
+        <h1>設定</h1>
+      </div>
+    </header>
+
+    <main>
+      <section class="card settings-card">
+        <div class="sec">
+          <h2 id="sizeLabel">表示サイズ</h2>
+          <div id="preview" class="preview" data-theme="dark" aria-label="表示サンプル">
+            <div id="previewInner" class="pv-inner">
+            <small class="pv-note">プレビュー ( 設定を反映する を押すまで、画面全体は変わりません )</small>
+            <div class="guild-head"><span class="guild-icon ph">あ</span><span class="guild-name">あるサーバー</span></div>
+            <div class="channels">
+              <label class="ch"><input type="checkbox" checked disabled /><span class="mark">#</span><span>rules</span></label>
+            </div>
+            <p class="hint">1件のチャンネルを読み上げます。</p>
+            <button type="button" class="go" disabled>読み上げ中</button>
+            </div>
+          </div>
+          <div class="slider">
+            <span>12</span>
+            <div class="range-wrap">
+              <input id="fontSize" type="range" min="12" max="24" step="1" aria-labelledby="sizeLabel" />
+              <div class="ticks" aria-hidden="true"></div>
+            </div>
+            <span>24</span>
+            <span id="fontSizeVal" class="val"></span>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>テーマ</h2>
+          <div class="radios">
+            <label><input type="radio" name="theme" value="light" /> ライト</label>
+            <label><input type="radio" name="theme" value="dark" /> ダーク</label>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>ログの表示項目</h2>
+          <div class="checks">
+            <label class="opt"><input id="logShowDate" type="checkbox" /> 日付</label>
+            <label class="opt"><input id="logShowTime" type="checkbox" /> 時間</label>
+            <label class="opt"><input id="logShowServer" type="checkbox" /> サーバー名</label>
+            <label class="opt"><input id="logShowChannel" type="checkbox" /> チャンネル名</label>
+            <label class="opt"><input id="logShowUser" type="checkbox" /> ユーザー名(アイコン付き)</label>
+            <label class="opt"><input id="logRoleColor" type="checkbox" /> ロールの色を反映</label>
+          </div>
+          <div id="logPreview" class="log log-preview" aria-label="ログの表示サンプル"></div>
+        </div>
+
+        <div class="sec">
+          <h2 id="pathLabel">棒読みちゃん 実行ファイル(Bouyomichan.exe)</h2>
+          <div class="row">
+            <input id="bouyomiPath" type="text" aria-labelledby="pathLabel" placeholder="例: C:\Tools\BouyomiChan\BouyomiChan.exe" />
+            <button id="pickExe" type="button" class="sub">参照…</button>
+          </div>
+          <p class="hint">「開始」を押したとき、棒読みちゃんが起動していなければ自動で起動します。空欄なら起動しません。</p>
+          <label class="check opt"><input id="closeBouyomiOnStop" type="checkbox" /> 「停止」を押したとき、このソフトが起動した棒読みちゃんも終了する</label>
+
+          <h2 id="urlLabel" class="sub-h">棒読みちゃん HTTP連携URL</h2>
+          <div class="row">
+            <input id="bouyomiUrl" type="text" aria-labelledby="urlLabel" />
+            <button id="testBtn" type="button" class="sub">テスト</button>
+          </div>
+
+          <h2 id="testLabel" class="sub-h">テストで読み上げる文章</h2>
+          <input id="testText" type="text" aria-labelledby="testLabel" />
+          <p class="hint">「テスト」ボタンで読み上げる文章です。</p>
+        </div>
+
+        <div class="sec">
+          <h2 id="tokenLabel">Botトークン</h2>
+          <div class="row">
+            <input id="token" type="password" autocomplete="off" aria-labelledby="tokenLabel" placeholder="Developer Portal の Bot ページで取得したトークン" />
+            <button id="toggleToken" type="button" class="sub">表示</button>
+          </div>
+          <p id="encNote" class="hint"></p>
+        </div>
+      </section>
+    </main>
+
+    <div class="footer">
+      <button id="aboutBtn" type="button" class="about-link">このソフトウェアについて</button>
+      <div class="footer-right">
+        <button id="resetAll" type="button" class="reset">すべての設定を初期化</button>
+        <div class="apply-row">
+          <span id="settingsNote" class="hint"></span>
+          <button id="applySettings" type="button" class="go">設定を反映する</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,433 @@
+/* テーマ: 既定はダーク。<html data-theme="light"> でライト */
+:root,
+[data-theme="dark"] {
+  --bg: #1e1f24;
+  --card: #2a2c33;
+  --line: #3a3d46;
+  --text: #e6e7ea;
+  --muted: #9a9ea8;
+  --field: #1b1c21;
+  --btn: #3a3d46;
+  --hover: #2a2c33;
+  --accent: #5865f2;
+  --ok: #3ba55d;
+  --go: #2e9150;
+  --warn: #e0a030;
+  --warn-text: #e0a030;
+  --err-text: #ed4245;
+  --read: #8fd3ff;
+  --sb: rgba(255, 255, 255, .26);
+  --sb-hover: rgba(255, 255, 255, .45);
+}
+[data-theme="light"] {
+  --bg: #f3f4f6;
+  --card: #ffffff;
+  --line: #d6d9df;
+  --text: #1f2329;
+  --muted: #5f6672;
+  --field: #ffffff;
+  --btn: #e6e8ec;
+  --hover: #eceef2;
+  --accent: #5865f2;
+  --ok: #2e9150;
+  --go: #2e9150;
+  --warn: #e0a030;
+  --warn-text: #b45309;
+  --err-text: #c62828;
+  --read: #0b6fa8;
+  --sb: rgba(0, 0, 0, .28);
+  --sb-hover: rgba(0, 0, 0, .5);
+}
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+
+/* スクロールバー: Chrome のような細くて丸い形。マウスを乗せると少し濃くなる */
+::-webkit-scrollbar { width: 14px; height: 14px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background-color: var(--sb);
+  background-clip: content-box;
+  border: 4px solid transparent;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--sb-hover); }
+::-webkit-scrollbar-thumb:active { background-color: var(--sb-hover); }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* 文字サイズは --fs(px)を基準に、ほかはすべて em で相対指定 */
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Yu Gothic UI", "Meiryo UI", "Segoe UI", sans-serif;
+  font-size: var(--fs, 14px);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+body.resizing { cursor: row-resize; user-select: none; }
+.view { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+}
+h1 { font-size: 1.143em; margin: 0; }
+h2 { font-size: .929em; margin: 0 0 8px; }
+h2.sub-h { margin-top: 16px; }
+.head-right { display: flex; align-items: center; gap: 10px; }
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 18px;
+  min-height: 0;
+  overflow-y: auto;
+}
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+.log-card { flex: 1; display: flex; flex-direction: column; min-height: 10.7em; }
+.log-card.sized { flex: none; }
+label { display: block; margin: 10px 0 4px; color: var(--muted); font-size: .857em; }
+label:first-child { margin-top: 0; }
+input[type=text], input[type=password], input[type=number] {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--field);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+}
+input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.row { display: flex; gap: 8px; align-items: center; }
+.row.between { justify-content: space-between; margin-bottom: 8px; }
+.spacer { flex: 1; }
+.options { margin-top: 12px; flex-wrap: wrap; gap: 16px; }
+.options label { margin: 0; color: var(--text); font-size: .929em; }
+.check input { margin-right: 4px; }
+.inline input { width: 5.2em; margin-left: 4px; }
+.actions { margin-top: 14px; }
+.hint { margin: 4px 0 0; color: var(--muted); font-size: .857em; }
+button {
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--btn);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: none;
+}
+button:hover:not(:disabled) { filter: brightness(1.15); }
+button:disabled { opacity: .45; cursor: default; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.warn { background: var(--warn); border-color: var(--warn); color: #1b1c21; font-weight: 600; }
+button.sub { background: transparent; }
+/* 緑のボタン(白文字)。無効のときは暗くして「読み上げ中」を示す */
+button.go { background: var(--go); border-color: var(--go); color: #fff; }
+button.go:disabled { opacity: 1; filter: brightness(.72); }
+/* 開始ボタンは、状態(開始/接続中/読み上げ中/再起動)が変わっても「読み上げ中」と同じ幅 */
+#startBtn { width: calc(5em + 34px); padding-left: 0; padding-right: 0; }
+.icon-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text);
+}
+.icon-btn svg {
+  width: 1.6em;
+  height: 1.6em;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.badge { padding: 3px 10px; border-radius: 999px; font-size: .857em; }
+.badge.stopped { background: var(--btn); }
+.badge.connecting { background: var(--warn); color: #1b1c21; }
+.badge.running { background: var(--ok); color: #fff; }
+.bstate { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+.bstate.ok { color: var(--go); border-color: var(--go); }
+
+/* ドラッグで高さを変えられる線(枠線と同じ色。カーソルが上下矢印に変わる) */
+.resizer {
+  height: 12px;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  cursor: row-resize;
+  touch-action: none;
+  user-select: none;
+}
+.resizer::before {
+  content: "";
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--line);
+  transition: background-color .12s;
+}
+.resizer:hover::before,
+.resizer:focus-visible::before,
+.resizer.drag::before { background: var(--muted); }
+.resizer:focus-visible { outline: none; }
+.log-card .resizer { margin-bottom: -4px; }
+
+/* サーバー/チャンネル一覧(上下の余白は従来の2倍) */
+.tree {
+  max-height: 10em;
+  overflow-y: auto;
+  background: var(--field);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 12px 10px 12px 16px; /* 左の余白 = 上の余白(アイコン上端まで 12+4+1) に揃える */
+}
+.tree.stale { opacity: .6; }
+.tree .empty { color: var(--muted); font-size: .857em; padding: 12px 0; }
+/* サーバー同士の区切り線は、枠の大きさが並べ替えで変わらないよう、疑似要素で描く */
+.guild { position: relative; padding: 12px 0 12px 3.5px; margin-left: -3.5px; }
+.guild:first-child { margin-top: -12px; }
+.guild:last-child { margin-bottom: -12px; }
+.guild + .guild::before { content: ""; position: absolute; top: 0; left: 3.5px; right: 0; border-top: 1px solid var(--line); }
+.guild-head { display: flex; align-items: center; gap: 8px; padding: 4px 0 8px; font-weight: 600; }
+.guild-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.guild-icon { width: calc(1.7em + 3px); height: calc(1.7em + 3px); border-radius: 50%; object-fit: cover; flex: none; }
+.guild-icon.ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff;
+  font-size: .857em;
+  /* 文字を小さくしても、画像のアイコン(1.7em + 3px)と同じ大きさにそろえる */
+  width: calc(1.9833em + 3px);
+  height: calc(1.9833em + 3px);
+}
+.sel-count { color: var(--muted); font-size: .786em; font-weight: 400; white-space: nowrap; }
+.guild-head .grow { flex: 1; }
+.guild-head button { padding: 2px 8px; font-size: .857em; font-weight: 400; }
+.guild-head button.fold { border: none; background: transparent; font-size: 1em; padding: 2px 6px; color: var(--muted); }
+.guild.collapsed .channels { display: none; }
+.channels { margin-left: calc(2.3em + 14px); } /* サーバー左のつまみの分、右へ */
+label.ch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 4px 4px;
+  color: var(--text);
+  font-size: .929em;
+  border-radius: 4px;
+  cursor: pointer;
+}
+label.ch:hover { background: var(--hover); }
+.ch .mark { width: calc(1.2em + 3px); text-align: center; color: var(--muted); font-size: calc(1em + 3px); line-height: 1; }
+.ch .cat { color: var(--muted); font-size: .786em; }
+
+/* 設定画面 */
+.settings-card { flex: 1; display: flex; flex-direction: column; }
+.sec + .sec { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.back { padding: 4px 8px 4px 0; }
+.preview {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  padding: .8em 1em;
+  margin-bottom: 10px;
+  font-family: "Yu Gothic UI", "Meiryo UI", "Segoe UI", sans-serif;
+}
+.preview { padding: 0; overflow: hidden; }
+.pv-inner { padding: .8em 1em; }
+.pv-note { display: block; color: var(--muted); font-size: .7em; margin-bottom: .6em; }
+.preview button { margin-top: .6em; }
+.slider { display: flex; align-items: center; gap: 10px; }
+.slider input[type=range] { flex: 1; accent-color: var(--accent); }
+.val { min-width: 3.2em; text-align: right; font-weight: 600; }
+.radios { display: flex; gap: 18px; }
+.radios label { margin: 0; color: var(--text); font-size: .929em; display: flex; gap: 6px; align-items: center; }
+.checks { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 10px; }
+.checks label { margin: 0; display: flex; gap: 6px; align-items: center; }
+label.opt { margin-top: 10px; color: var(--text); font-size: .929em; }
+.checks label.opt { margin-top: 0; }
+.footer {
+  flex: none; /* 設定画面では本文の外(最下段)に固定。本文が増えても重ならない */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: var(--card);
+  border-top: 1px solid var(--line);
+}
+.footer .hint { margin: 0; }
+.footer { align-items: flex-end; }
+.footer-right { display: flex; flex-direction: column; align-items: flex-end; gap: 30px; } /* 初期化ボタンと「設定を反映する」の間隔(従来の10pxの3倍) */
+.apply-row { display: flex; align-items: center; gap: 12px; }
+/* すべての設定を初期化: ふだんはグレー(文字は白)、マウスオーバーで赤 */
+button.reset {
+  background: #6b7280;
+  color: #fff;
+  border: 1px solid #6b7280;
+  border-radius: 6px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background-color .12s, border-color .12s;
+}
+button.reset:hover, button.reset:focus-visible { background: #d63638; border-color: #d63638; }
+.about-link {
+  background: none; border: 0; padding: 0; margin: 0;
+  color: var(--muted); font: inherit; font-size: .857em; cursor: pointer;
+}
+.about-link:hover { text-decoration: underline; color: var(--text); }
+.actions .restart-note { flex: 1; min-width: 0; margin: 0 0 0 8px; line-height: 1.4; } /* 停止の右隣。表示/非表示だけ切り替えるので、位置はずれない */
+
+/* 表示サイズ スライダーの目盛り */
+.range-wrap { position: relative; flex: 1; padding-bottom: 1.6em; }
+.range-wrap input[type=range] { width: 100%; margin: 0; }
+.range-wrap .ticks { position: absolute; left: 0; right: 0; top: 1.5em; height: 1.6em; pointer-events: none; }
+.range-wrap .ticks i { font-style: normal; position: absolute; top: 0; width: 1px; height: 5px; background: var(--muted); transform: translateX(-.5px); }
+.range-wrap .ticks i[data-n] { height: 8px; }
+.range-wrap .ticks i[data-n]::after {
+  content: attr(data-n); position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  font-size: .75em; color: var(--muted);
+}
+
+/* このソフトウェアについて */
+.about-body { margin: 0; background: var(--card); display: block; height: auto; }
+.about { display: flex; flex-direction: column; flex: none; overflow: visible; min-height: 100vh; padding: 24px 28px; box-sizing: border-box; }
+.about-text { flex: 1; line-height: 1.7; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+.about-text p { margin: 0 0 1.1em; }
+.about-head { margin-bottom: 1.2em; padding: .8em 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.about-head p { margin: 0; }
+.about-title { font-weight: 600; }
+.about-ver { color: var(--muted); font-size: .929em; }
+.about-text .lic-title { margin-bottom: .2em; }
+.about-text a { color: var(--accent, #5b8def); text-decoration: none; }
+.about-text a:hover { text-decoration: underline; }
+.about-actions { display: flex; justify-content: center; }
+
+/* ログ */
+.log {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--field);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: Consolas, "Yu Gothic UI", monospace;
+  font-size: .893em;
+  line-height: 1.6;
+  user-select: text;
+}
+.log-preview { flex: none; min-height: 3.4em; overflow-y: hidden; }
+.line { word-break: break-word; }
+.line.warn { color: var(--warn-text); }
+.line.error { color: var(--err-text); }
+.line.read { color: var(--read); }
+.line.info { color: var(--text); }
+.line .avatar {
+  display: inline-block;
+  width: 1.4em;
+  height: 1.4em;
+  border-radius: 50%;
+  vertical-align: middle;
+  position: relative;
+  top: -0.09em; /* 文字の上下中央に揃える微調整 */
+  margin-right: .2em;
+  object-fit: cover;
+}
+.line .avatar.ph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff;
+  font-size: .75em;
+  line-height: 1;
+  top: -0.12em; /* 文字が .75em なので、上の微調整と同じ距離になるよう換算 */
+  width: 1.8667em; /* 画像のアイコン(1.4em)と同じ大きさ */
+  height: 1.8667em;
+}
+
+/* サーバーの並べ替えつまみ(サーバーの左) */
+#channelTree { position: relative; }
+.guild-head button.guild-grip {
+  flex: none; width: 12px; height: 24px; margin: 0 2px 0 0; padding: 0;
+  display: block; background: transparent; border: none; border-radius: 3px;
+  cursor: grab; touch-action: none;
+}
+.guild-grip svg { display: block; width: 12px; height: 24px; fill: none; }
+.guild-grip .bars { stroke: var(--line); stroke-width: 2; stroke-linecap: round; }
+.guild-grip:hover .bars, .guild-grip:focus-visible .bars { stroke: var(--muted); }
+.guild-grip:focus-visible { outline: none; }
+.guild.dragging { position: relative; z-index: 5; background: color-mix(in srgb, var(--field) 88%, #fff); border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.35); will-change: transform; }
+.guild.dragging .guild-grip { cursor: grabbing; }
+.guild.dragging .guild-grip .bars { stroke: var(--muted); }
+
+/* 対象チャンネル一覧: 枠の余白は「読み上げるサーバー・チャンネル」(.tree)と同じ */
+.selected-list {
+  display: flex; flex-direction: column;
+  max-height: 14em; overflow: hidden;
+  background: var(--field); border: 1px solid var(--line); border-radius: 6px;
+  padding: 12px 10px 12px 16px;
+}
+.sel-head { flex: none; display: flex; align-items: center; gap: 8px; padding: 4px 0 8px; }
+.selected-list.bare .sel-head { padding: 4px 0; }
+.sel-lead { flex: 1; min-width: 0; color: var(--muted); font-size: .786em; }
+.sel-lead.empty { font-size: .857em; }
+.sel-lead.minis { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; font-size: 1em; color: var(--text); }
+.sel-divider { flex: none; border-top: 1px solid var(--line); margin: 8px 0 12px; } /* 枠(見出し)とサーバー一覧の仕切り */
+.sel-body { flex: 1; min-height: 0; overflow-y: auto; }
+.selected-list.collapsed { height: auto !important; max-height: none !important; }
+.sel-guild + .sel-guild { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.sel-ch { display: flex; align-items: center; gap: 4px; padding: 3px 0 3px 2.4em; }
+.sel-ch .mark { width: calc(1.2em + 3px); text-align: center; color: var(--muted); }
+.sel-ch .cat { color: var(--muted); font-size: .786em; margin-left: 4px; }
+
+/* 対象チャンネル一覧: 見出し行・折りたたみ・サーバーごとの折りたたみ */
+button.fold { border: none; background: transparent; font-size: 1em; padding: 2px 6px; color: var(--muted); cursor: pointer; }
+button.fold:hover { color: var(--text); }
+.sel-guild .guild-head { align-items: center; }
+.sel-guild .guild-head .grow { flex: 1; }
+.sel-guild.collapsed .sel-ch { display: none; }
+.sel-guild.collapsed .guild-head { padding-bottom: 4px; }
+.selected-list.collapsed + .resizer { display: none; }
+.sel-mini { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.sel-mini .num { color: var(--muted); font-weight: 400; }
+
+/* ホームのカテゴリー(枠)の並べ替え */
+.card.cat { position: relative; padding-left: 30px; padding-right: 30px; } /* つまみの分の余白を、左右で同じ幅にする */
+.card.cat > .options:first-child { margin-top: 0; }
+.grip {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 42px; padding: 0;
+  display: block;
+  background: transparent; border: none; border-radius: 4px;
+  color: var(--muted); cursor: grab; touch-action: none;
+}
+.grip svg { display: block; width: 18px; height: 42px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.grip .bars { stroke: var(--line); stroke-width: 2; } /* 縦線2本は、高さ調整の線(.resizer)と同じ色・太さ */
+.grip:hover, .grip:focus-visible { outline: none; }
+.grip:hover .bars, .grip:focus-visible .bars { stroke: var(--muted); } /* 高さ調整の線と同じく、触れると濃くなる */
+#homeMain { position: relative; }
+.card.cat.dragging { background: color-mix(in srgb, var(--card) 90%, #fff); outline: 2px solid var(--accent); box-shadow: 0 8px 24px rgba(0,0,0,.35); z-index: 5; will-change: transform; } /* 枠の中を少し白く。マウスに追尾 */
+.card.cat.dragging .grip { cursor: grabbing; }
+.card.cat.dragging .grip .bars { stroke: var(--muted); }
+body.reordering, body.reordering * { cursor: grabbing !important; user-select: none; }
+
+/* 更新のお知らせ */
+button.badge.update { border: none; cursor: pointer; background: var(--accent, #5b8def); color: #fff; font-family: inherit; }
+button.badge.update:hover { filter: brightness(1.1); }
+.about-update { margin-bottom: 1.1em; }
+.about-update p { margin: 0 0 .5em; white-space: pre-line; }

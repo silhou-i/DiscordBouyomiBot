@@ -1,0 +1,26 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('api', {
+  loadSettings: () => ipcRenderer.invoke('settings:load'),
+  saveSettings: (s) => ipcRenderer.invoke('settings:save', s),
+  resetSettings: () => ipcRenderer.invoke('settings:reset'),
+  getState: () => ipcRenderer.invoke('bot:state'),
+  start: (s) => ipcRenderer.invoke('bot:start', s),
+  stop: () => ipcRenderer.invoke('bot:stop'),
+  testBouyomi: (url) => ipcRenderer.invoke('bouyomi:test', url),
+  checkBouyomi: (url) => ipcRenderer.invoke('bouyomi:check', url),
+  pickExe: () => ipcRenderer.invoke('dialog:pickExe'),
+  openAbout: () => ipcRenderer.invoke('about:open'),
+  aboutInfo: () => ipcRenderer.invoke('about:info'),
+  fitAbout: (h) => ipcRenderer.invoke('about:fit', h),
+  closeAbout: () => ipcRenderer.invoke('about:close'),
+  openExternal: (url) => ipcRenderer.invoke('shell:open', url),
+  checkUpdate: () => ipcRenderer.invoke('update:check'),
+  updateState: () => ipcRenderer.invoke('update:state'),
+  applyUpdate: () => ipcRenderer.invoke('update:apply'),
+  onUpdateInfo: (cb) => ipcRenderer.on('update:info', (_e, info) => cb(info)),
+  onUpdateProgress: (cb) => ipcRenderer.on('update:progress', (_e, p) => cb(p)),
+  onLog: (cb) => ipcRenderer.on('log', (_e, entry) => cb(entry)),
+  onStatus: (cb) => ipcRenderer.on('status', (_e, payload) => cb(payload)),
+  onChannels: (cb) => ipcRenderer.on('channels', (_e, list) => cb(list)),
+});

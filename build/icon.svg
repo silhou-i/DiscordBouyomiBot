@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!--
+    Discord 棒読みちゃんBot アイコン(3色・グラデーションなし)
+      水色  #5CC2D3  背景・目・口
+      白    #FFFFFF  饅頭(ゆっくり)の顔と吹き出しのしっぽ
+      琥珀  #FFB547  舌・音(声)の波
+    モチーフ: 饅頭(丸い顔) / 口 / 会話(吹き出し) / 音(波)
+  -->
+  <defs>
+    <clipPath id="mouth"><path d="M181.6 255.7 Q240.5 345.1 299.4 255.7 Z"/></clipPath>
+  </defs>
+  <circle cx="256" cy="256" r="256" fill="#5CC2D3"/>
+  <!-- 饅頭の顔(真円) + 吹き出しのしっぽ -->
+  <circle cx="240.5" cy="240.5" r="135.0" fill="#FFFFFF"/>
+  <path d="M194.3 363.0 L136.8 406.5 L150.7 335.8 Z" fill="#FFFFFF"/>
+  <!-- 目 -->
+  <ellipse cx="191.1" cy="200.6" rx="14.3" ry="22.8" fill="#5CC2D3"/>
+  <ellipse cx="289.9" cy="200.6" rx="14.3" ry="22.8" fill="#5CC2D3"/>
+  <!-- 口(開けてしゃべっている) -->
+  <path d="M181.6 255.7 Q240.5 345.1 299.4 255.7 Z" fill="#5CC2D3"/>
+  <ellipse cx="240.5" cy="293.7" rx="30.4" ry="14.3" fill="#FFB547" clip-path="url(#mouth)"/>
+  <!-- 音(声)の波: 前回と全く同じ -->
+  <path d="M396 206 Q430 256 396 306" fill="none" stroke="#FFB547" stroke-width="22" stroke-linecap="round"/>
+  <path d="M432 172 Q482 256 432 340" fill="none" stroke="#FFB547" stroke-width="22" stroke-linecap="round"/>
+</svg>
