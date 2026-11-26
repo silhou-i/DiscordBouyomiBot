@@ -1,0 +1,48 @@
+name: Build and Release
+
+# main ブランチに push すると、exe をビルドして GitHub の Releases に公開します。
+# タグ(v1.0.0-b番号)は package.json の version と buildInfo.build から自動で決まります。
+# すでに同じタグのリリースがある場合は、何もしません。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: タグとリリース名を決める
+        id: ver
+        shell: bash
+        run: |
+          node -e "const p=require('./package.json');const b=p.buildInfo;const o=process.env.GITHUB_OUTPUT;require('fs').appendFileSync(o,'tag=v'+p.version+'-b'+b.build+'\nname=Version '+p.version+' '+b.date+'.'+b.seed+'.'+b.arch+'\n')"
+      - name: 同じタグのリリースがあるか確認
+        id: exists
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.ver.outputs.tag }}" >/dev/null 2>&1; then echo "found=true" >> "$GITHUB_OUTPUT"; else echo "found=false" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.exists.outputs.found == 'false'
+        run: npm install
+      - name: アイコンを作る(build/icon.svg から)
+        if: steps.exists.outputs.found == 'false'
+        run: |
+          npm install --no-save sharp png-to-ico
+          node scripts/make-icons.js
+      - if: steps.exists.outputs.found == 'false'
+        run: npm run dist
+      - if: steps.exists.outputs.found == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.ver.outputs.tag }}" DiscordBouyomiBot.exe --target "${{ github.sha }}" --title "${{ steps.ver.outputs.name }}" --notes "${{ steps.ver.outputs.name }}"
