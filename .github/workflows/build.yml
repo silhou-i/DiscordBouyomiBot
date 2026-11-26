@@ -5,7 +5,7 @@ name: Build and Release
 # すでに同じタグのリリースがある場合は、何もしません。
 on:
   push:
-    branches: [main]
+    branches: ['**']
   workflow_dispatch:
 
 permissions:
